@@ -135,7 +135,7 @@ This function leverages the Get-FluxObject function to return a list of all reco
 **Example**
 Retrieve all initiatives stored within Fluxx pulling 500 records at a time.
 ```sh
-PS C:\Users\you> Get-FluxxObjectList -BearerToken <bearer token> -BaseUrl "<your site>.fluxx.io" -FluxxObject "initiative" -RecordsPerPage 500"
+PS C:\Users\you> Get-FluxxObjectList -BearerToken <bearer token> -BaseUrl "<your site>.fluxx.io" -FluxxObject "initiative" -RecordsPerPage 500
 ```
 
 **Example**
