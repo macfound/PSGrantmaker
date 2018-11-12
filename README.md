@@ -8,7 +8,7 @@ PS C:\Users\you> Import-Module "C:\Modules\PSGrantmaker.psm1"
 ### Get-FluxxBearerToken
 Every call to the Fluxx API requires an authentication token. This call returns an object containing an token (access_token), token type (token_type), and the number of seconds before the token expires (expires_in). This should be the first call made before any others. The access_token attribute is used as the -BearerToken parameter in all of the other calls.
 
-Before making this call, an OAuth application needs to be registered at **https://<your site>.fluxx.io/oauth/applications**. The person registering the application will need to be logged in as an admin before visiting the site. The Application ID and Secret provided during the registration are used for this call.
+Before making this call, an OAuth application needs to be registered at **https://YourSiteName.fluxx.io/oauth/applications**. The person registering the application will need to be logged in as an admin before visiting the site. The Application ID and Secret provided during the registration are used for this call.
 
 **Parameters**
   - ***BaseURL***: The URL for the Fluxx instance being called.
