@@ -1,4 +1,4 @@
-﻿[System.Reflection.Assembly]::LoadWithPartialName("System.web")
+[System.Reflection.Assembly]::LoadWithPartialName("System.web")
 
 ##### CSHARP CLASS FOR DATATABLE HANDLING #####
 $Assem = (
@@ -108,6 +108,28 @@ namespace Fluxx.GrantMaker {
                 writer.Flush();
             }
             return sw.ToString();
+        }
+
+        public static void ProcessDates(string dateCols, ref DataTable dataTable) {
+
+            string[] columns = dateCols.Split(new string[] { "," }, StringSplitOptions.None);
+            DataTable newDataTable = new DataTable();
+
+            foreach(DataColumn column in dataTable.Columns) {
+
+                if (Array.IndexOf(columns, column.ColumnName) >= 0) {
+                    var col = new DataColumn(column.ColumnName, typeof(DateTime));
+                    col.DateTimeMode = DataSetDateTime.Utc;
+                    newDataTable.Columns.Add(col);
+                    var logString = DateTime.Now.ToString("yyyyMMdd.HHmmss");
+                    Console.WriteLine(logString + " Fluxx.GrantMaker.DataTableUtility - Formatting " + column.ColumnName + " as DateTime");
+                } else {
+                    newDataTable.Columns.Add(column.ColumnName, column.DataType);
+                }
+            }
+
+            newDataTable.Load(dataTable.CreateDataReader(), System.Data.LoadOption.OverwriteChanges);
+            dataTable = newDataTable;
         }
 
         public static void ProcessRecords(String json, ref DataTable dataTable) {
@@ -1264,6 +1286,31 @@ param (
         Log-Message "Export-FluxxObjectListToSQLServer" "Converting $FluxxObject Records to DataTable"
         $DataTable = New-Object Data.DataTable
         [Fluxx.GrantMaker.DataTableUtility]::ProcessRecords(($ObjectList | ConvertTo-Json),[ref] $DataTable)
+
+        # Identify Date Columns
+        $DateColumns = @()
+        $StringColumns = $DataTable.Columns | Where {$_.DataType -like '*String' -and $_.ColumnName -notlike '*_xml'}
+        foreach($StringColumn in $StringColumns.ColumnName) {
+            $IsDate = $true
+            $ColumnValues = ($DataTable | where {[string]::IsNullOrEmpty($_.$StringColumn) -eq $false} | Select id, $StringColumn -First 10)
+            if($ColumnValues -is [Array]) {
+                foreach($ColumnValue in $ColumnValues.$StringColumn) {
+                    $DateCheck = $ColumnValue -as [DateTime]
+                    if(!$DateCheck) {
+                        $IsDate = $false
+                        break
+                    }
+                }
+            } else {
+                $DateCheck = ($DataTable | where {[string]::IsNullOrEmpty($_.$ColumnValues)} | Select $ColumnValue -First 1).$ColumnValues
+                if(!$DateCheck) { $IsDate = $false; }
+            }
+            if($IsDate) { $DateColumns += $StringColumn; }
+        }
+        
+        Log-Message "Export-FluxxObjectListToSQLServer" "Formatting Date/Time Records within DataTable"
+        [Fluxx.GrantMaker.DataTableUtility]::ProcessDates(($DateColumns -join ","),[ref] $DataTable)
+
         $ProcessDateColumn = New-Object system.Data.DataColumn api_import_date,([datetime])
         $ProcessDateColumn.DefaultValue = $ProcessDate
         $DataTable.Columns.Add($ProcessDateColumn)
