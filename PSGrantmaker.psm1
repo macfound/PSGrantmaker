@@ -1234,7 +1234,7 @@ Export-ModuleMember -Function Import-FluxxDocument
   The password to be used to connect to the SQL Server
 
  .Parameter SQLSchema
-  [Optional] A schema name to be used. Defaults to fluxx
+  [Optional] A schema name to be used. Defaults to dbo
 
  .Parameter OverwriteTable
   [Optional] A switch used to to drop and recreate the table. If the switch isnt used, records will be appended to the table.
@@ -1262,7 +1262,7 @@ param (
 
     $ProcessDate = Get-Date
 
-    If(!$SQLSchema) { $SQLSchema = "fluxx" }
+    If(!$SQLSchema) { $SQLSchema = "dbo" }
     try {
         Log-Message "Export-FluxxObjectListToSQLServer" "Retrieving $FluxxObject Records"
         $ObjectList = Get-FluxxObjectList $BearerToken $BaseUrl $FluxxObject $RecordsPerPage $QuerystringParameters $ApiVersion
